@@ -1,0 +1,6 @@
+# Streamlit and extensions
+streamlit
+requests
+
+# Data science
+ pandas
