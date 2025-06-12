@@ -3,10 +3,10 @@ import pandas as pd
 
  #Load compound data
 
-#def load_data():
- #   return pd.read_csv("tox21_test_with_names.csv")
+def load_data():
+    return pd.read_pickle('media/compounds.pkl')
 
-#data = load_data()
+df = load_data()
 
 
 # Sidebar
@@ -28,6 +28,7 @@ name_input = st.sidebar.selectbox(f"Select a {name_type.lower()}:", sorted(names
 
 # Input 2: SMILES
 smiles_input = st.sidebar.text_input("Or enter a SMILES string:")
+
 
 
 
