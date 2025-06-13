@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from streamlit_searchbox import st_searchbox
+import requests
 
 
 def load_data():
@@ -69,12 +70,34 @@ with st.sidebar:
 
 # Prediction logic
 if predict_button:
-    if (name_input and name_input != "") or (smiles_input and smiles_input != ""):
-        query = name_input if name_input else smiles_input
-        st.success(f"Prediction triggered using: {query}")
-    else:
-        st.warning("Please select a name or enter a SMILES string before predicting.")
+    if search_mode == "SMILES":
+        iupac_name = ""
+        common_name = ""
+        smiles = smiles_input
+    elif search_mode == "Name":
+        if name_type == "Common Name":
+            iupac_name = ""
+            common_name = name_input
+            smiles = ""
+        else :
+            iupac_name = name_input
+            common_name = ""
+            smiles = ""
 
+if predict_button:
+    try:
+        data = {"iupac_name": iupac_name,  "common_name": common_name, "smiles": smiles,}
+        response = requests.post("http://localhost:8000/predict/", json=data)
+
+        if response.status_code == 200:
+            st.success(":white_check_mark: Data submitted successfully!")
+            st.write(response.json())
+        else:
+            st.error(":x: Submission failed")
+    except:
+        st.error(":x: Cannot connect to server")
+else:
+    st.warning("Please fill all fields")
 
 # -------------------- Footer ----------------------
 st.markdown("---")
