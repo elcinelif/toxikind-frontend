@@ -5,6 +5,7 @@ requests
 
 # Data science
  pandas
+numpy
 
 #Data viz
-plotly
+matplotlib
