@@ -39,12 +39,11 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
+# -------------------- Sidebar Input --------------------
 
 with st.sidebar:
     st.header("Input")
 
-    # Choose search mode
     search_mode = st.radio("Search by:", ["Name", "SMILES"], index=0)
 
     name_input = None
@@ -56,9 +55,7 @@ with st.sidebar:
             names = df["title"].dropna().unique().tolist()
         else:
             names = df["iupac_name"].dropna().unique().tolist()
-
         name_input = st.selectbox(f"Select a {name_type.lower()}:", [""] + sorted(names))
-
     else:
         smiles_input = st_searchbox(
             search_smiles,
@@ -66,38 +63,76 @@ with st.sidebar:
             placeholder="Type or paste a SMILES string..."
         )
 
-    predict_button = st.button("Predict")
+    input_ready = (smiles_input if search_mode == "SMILES" else name_input)
+    predict_button = st.button("Predict", disabled=not input_ready)
 
-# Prediction logic
+# -------------------- Prediction --------------------
+
 if predict_button:
+    smiles = ""
+    common_name = ""
+    iupac_name = ""
+
     if search_mode == "SMILES":
-        iupac_name = ""
-        common_name = ""
         smiles = smiles_input
     elif search_mode == "Name":
-        if name_type == "Common Name":
-            iupac_name = ""
-            common_name = name_input
-            smiles = ""
-        else :
-            iupac_name = name_input
-            common_name = ""
-            smiles = ""
+        if name_input:
+            if name_type == "Common Name":
+                common_name = name_input
+            else:
+                iupac_name = name_input
 
-if predict_button:
-    try:
-        data = {"iupac_name": iupac_name,  "common_name": common_name, "smiles": smiles,}
-        response = requests.post("http://localhost:8000/predict/", json=data)
+    if any([smiles, common_name, iupac_name]):
+        with st.spinner("🧪 Predicting toxicity..."):
+            try:
+                data = {
+                    "iupac_name": iupac_name,
+                    "common_name": common_name,
+                    "smiles": smiles,
+                }
+                response = requests.post("http://localhost:8000/predict/", json=data)
 
-        if response.status_code == 200:
-            st.success(":white_check_mark: Data submitted successfully!")
-            st.write(response.json())
-        else:
-            st.error(":x: Submission failed")
-    except:
-        st.error(":x: Cannot connect to server")
-else:
-    st.warning("Please fill all fields")
+                if response.status_code == 200:
+                    st.success(":white_check_mark: Data submitted successfully!")
+                    st.write(response.json())
+                else:
+                    st.error(f":x: Submission failed with status code {response.status_code}")
+            except Exception as e:
+                st.error(f":x: Cannot connect to server: {e}")
+    else:
+        st.warning("Please provide a valid input.")
+
+
+###### Prediction logic-works but slow
+#if predict_button:
+ #   if search_mode == "SMILES":
+  #      iupac_name = ""
+   #     common_name = ""
+    #    smiles = smiles_input
+    #elif search_mode == "Name":
+     #   if name_type == "Common Name":
+      #      iupac_name = ""
+       #     common_name = name_input
+        #    smiles = ""
+        #else :
+        #    iupac_name = name_input
+        #    common_name = ""
+        #    smiles = ""
+
+#if predict_button:
+ #   try:
+  #      data = {"iupac_name": iupac_name,  "common_name": common_name, "smiles": smiles,}
+   #     response = requests.post("http://localhost:8000/predict/", json=data)
+
+    #    if response.status_code == 200:
+     #       st.success(":white_check_mark: Data submitted successfully!")
+      #      st.write(response.json())
+       # else:
+        #    st.error(":x: Submission failed")
+    #except:
+     #   st.error(":x: Cannot connect to server")
+#else:
+ #   st.warning("Please fill all fields")
 
 # -------------------- Footer ----------------------
 st.markdown("---")
