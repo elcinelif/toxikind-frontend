@@ -5,3 +5,6 @@ requests
 
 # Data science
  pandas
+
+#Data viz
+plotly
