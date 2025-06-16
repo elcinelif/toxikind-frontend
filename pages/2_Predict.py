@@ -78,43 +78,51 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # -------------------- Prediction Section --------------------
 
-if predict_button:
-    smiles = ""
-    common_name = ""
-    iupac_name = ""
+# if predict_button:
+#     smiles = ""
+#     common_name = ""
+#     iupac_name = ""
 
-    if search_mode == "SMILES":
-        smiles = smiles_input
-    elif search_mode == "Name":
-        if name_input:
-            if name_type == "Common Name":
-                common_name = name_input
-            else:
-                iupac_name = name_input
+#     if search_mode == "SMILES":
+#         smiles = smiles_input
+#     elif search_mode == "Name":
+#         if name_input:
+#             if name_type == "Common Name":
+#                 common_name = name_input
+#             else:
+#                 iupac_name = name_input
 
-    if any([smiles, common_name, iupac_name]):
-        with st.spinner("🧪 Predicting toxicity..."):
-            try:
-                data = {
-                    "iupac_name": iupac_name,
-                    "common_name": common_name,
-                    "smiles": smiles,
-                }
-                response = requests.post("http://localhost:8000/predict/", json=data)
+#     if any([smiles, common_name, iupac_name]):
+#         with st.spinner("🧪 Predicting toxicity..."):
+#             try:
+#                 data = {
+#                     "iupac_name": iupac_name,
+#                     "common_name": common_name,
+#                     "smiles": smiles,
+#                 }
+#                 response = requests.post("http://localhost:8000/predict/", json=data)
 
-                if response.status_code == 200:
-                    st.success(":white_check_mark: Prediction completed successfully!")
+#                 if response.status_code == 200:
+#                     st.success(":white_check_mark: Prediction completed successfully!")
 
-                    # Display results in a more organized way
-                    st.subheader("Prediction Results")
-                    results = response.json()
+#                     # Display results in a more organized way
+#                     st.subheader("Prediction Results")
+#                     results = response.json()
 
-                    # You can customize how you display the results here
-                    st.json(results)  # or create a more detailed display
+#                     # You can customize how you display the results here
+#                     st.json(results)  # or create a more detailed display
 
-                else:
-                    st.error(f":x: Prediction failed with status code {response.status_code}")
-            except Exception as e:
-                st.error(f":x: Cannot connect to server: {e}")
-    else:
-        st.warning("Please provide a valid input.")
+#                 else:
+#                     st.error(f":x: Prediction failed with status code {response.status_code}")
+#             except Exception as e:
+#                 st.error(f":x: Cannot connect to server: {e}")
+#     else:
+#         st.warning("Please provide a valid input.")
+
+data = {
+                   "compound": 'NCGC00261900-01',
+                   "target": 'SR.MMP',
+                 }
+response = requests.post("http://localhost:8000/predict/", json=data)
+
+st.write(response.json())
