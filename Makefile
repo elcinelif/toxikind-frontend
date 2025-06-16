@@ -21,8 +21,7 @@ install_requirements:
 # ----------------------------------
 
 streamlit:
-	-@streamlit run app.py
-
+	-@streamlit run 1_Home.py
 
 # ----------------------------------
 #    LOCAL INSTALL COMMANDS
