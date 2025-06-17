@@ -9,6 +9,8 @@ def load_data():
 
 df = load_data()
 
+#clean the dataset at this point, so that drop na and unique wont be needed later on.
+
 # Prepare autocomplete for SMILES
 smiles_list = df["smiles"].dropna().unique().tolist()
 
@@ -98,7 +100,7 @@ if predict_button:
                 data = {
                     "compound": compound_id,
                 }
-                response = requests.post("http://localhost:8000/predict/", json=data)
+                response = requests.get("http://localhost:8000/predict/", json=data)
 
                 if response.status_code == 200:
                     st.success(":white_check_mark: Prediction completed successfully!")
@@ -155,10 +157,10 @@ if predict_button:
     # else:
     #     st.warning("Please provide a valid input.")
 
-data = {
-                   "compound": 'NCGC00261900-01',
-                   "target": 'SR.MMP',
-                 }
-response = requests.post("http://localhost:8000/predict/", json=data)
+# data = {
+#                    "compound": 'NCGC00261900-01',
+#                    "target": 'SR.MMP',
+#                  }
+# response = requests.post("http://localhost:8000/predict/", json=data)
 
-st.write(response.json())
+# st.write(response.json())
