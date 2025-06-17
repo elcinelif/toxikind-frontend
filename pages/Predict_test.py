@@ -4,6 +4,8 @@ from streamlit_searchbox import st_searchbox
 import requests
 import matplotlib.pyplot as plt
 import numpy as np
+from frontendlogic.llm import toxikind_summarizer
+
 
 # -------------------- SETUP --------------------
 def load_data():
@@ -83,7 +85,7 @@ if predict_button:
     }
 
     with st.spinner("🧪 Running predictions..."):
-        try:
+        #try:
             # MOCK response (replace with API call later)
             mock_results = {
                 "NR-AR_prediction": 1, "NR-AR_probability": 0.87,
@@ -145,5 +147,10 @@ if predict_button:
 
             st.pyplot(fig)
 
-        except Exception as e:
-            st.error(f":x: Prediction failed: {e}")
+            st.write(mock_results)
+            chain = toxikind_summarizer(results_df=mock_results)
+            summary = chain.run(results_df=mock_results)
+            st.write(summary)
+
+        #except Exception as e:
+        #    st.error(f":x: Prediction failed: {e}")

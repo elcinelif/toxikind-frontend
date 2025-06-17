@@ -9,3 +9,7 @@ numpy
 
 #Data viz
 matplotlib
+
+#LLM
+langchain
+langchain-google-genai
