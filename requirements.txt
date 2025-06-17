@@ -9,3 +9,6 @@ numpy
 
 #Data viz
 matplotlib
+
+#LLM
+langchain
