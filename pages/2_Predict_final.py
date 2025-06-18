@@ -6,21 +6,15 @@ from streamlit_searchbox import st_searchbox
 import requests
 from frontendlogic.llm import toxikind_summarizer
 
-
 # -------------------- TOX21 ASSAY DEFINITIONS --------------------
 TOX21_ASSAYS = [
     "Androgen Receptor (NR-AR)",
     "Androgen Receptor LBD (NR-AR-LBD)",
     "Aryl Hydrocarbon (NR-AhR)",
-    "Estrogen Receptor (NR-ER)",
     "Estrogen Receptor LBD (NR-ER-LBD)",
-    "PPAR-gamma (NR-PPARγ)",
     "Antioxidant Response (SR-ARE)",
-    "DNA Damage (SR-ATAD5)",
-    "Heat Shock Response (SR-HSE)",
     "Mitochondrial Membrane (SR-MMP)",
-    "p53 Stress Response (SR-p53)",
-    "Aromatase Inhibition (NR-Arom)"
+
 ]
 
 # -------------------- LOAD DATA --------------------
@@ -52,7 +46,6 @@ st.markdown(
 
 # -------------------- INPUT SECTION --------------------
 st.header("Compound Input")
-
 col1, col2 = st.columns([1, 3])
 
 with col1:
@@ -101,40 +94,30 @@ if predict_button:
                     st.error(f"Prediction failed with status code {response.status_code}")
                     st.stop()
 
+                results = response.json()
                 st.write(pd.DataFrame(response.json()))
+
 
             except Exception as e:
                 st.error(f"Cannot connect to server: {e}")
                 st.stop()
 
-        results = response.json()
         st.success("✅ Prediction completed!")
         st.subheader("🧪 Toxicity Results")
 
-        predictions = []
-        probabilities = []
-        acronyms = []
-
-        for assay in TOX21_ASSAYS:
-            tox21_id = assay.split("(")[-1].replace(")", "")
-            acronyms.append(tox21_id)
-            predictions.append(results.get(f"{tox21_id}_prediction", "N/A"))
-            probabilities.append(results.get(f"{tox21_id}_probability", 0))
-
-        results_df = pd.DataFrame({
-            "Assay": TOX21_ASSAYS,
-            "Toxic?": ["Yes" if p == 1 else "No" for p in predictions],
-            "Probability": [f"{p:.2%}" for p in probabilities]
-        })
-
-        st.dataframe(results_df, use_container_width=True)
+        results_df = pd.DataFrame(results)
+        results_df.columns = ['Acronym', 'Assay', 'Probability', 'Toxic?' ]
+        results_df = results_df.sort_values('Assay')
+        display_df = results_df[['Assay', 'Toxic?', 'Probability']]
+        display_df['Probability'] = (display_df['Probability'] * 100).map("{:.1f}%".format)
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
 
         # -------------------- RADAR CHART --------------------
         st.subheader("📊 Overview of Probabilities")
 
-        values = probabilities.copy()
+        acronyms = results_df['Acronym'].to_list()
+        values = results_df['Probability'].to_list()
         angles = np.linspace(0, 2 * np.pi, len(acronyms), endpoint=False).tolist()
-
         values += values[:1]
         angles += angles[:1]
 
@@ -155,13 +138,10 @@ if predict_button:
         st.subheader("🤖 Summary (LLM Interpretation)")
 
         try:
-            # toxikind_summarizer accepts a dictionary
             chain = toxikind_summarizer(results_df=results)
             summary = chain.run(results_df=results)
             st.write(summary)
         except Exception as e:
             st.warning(f"LLM summary failed: {e}")
-
-
     else:
         st.warning("Please provide a valid input.")
