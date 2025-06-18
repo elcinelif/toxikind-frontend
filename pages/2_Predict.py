@@ -101,7 +101,7 @@ if predict_button:
                     "compound": compound_id,
                 }
                 print(compound_id)
-                response = requests.get("http://localhost:8000/predict/", params=data)
+                response = requests.get("https://toxikind-409383403556.europe-west1.run.app/predict", params=data)
 
                 if response.status_code == 200:
                     st.success(":white_check_mark: Prediction completed successfully!")

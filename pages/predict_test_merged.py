@@ -65,7 +65,7 @@ with col2:
         names = df["title"].dropna().unique().tolist() if name_type == "Common Name" else df["iupac_name"].dropna().unique().tolist()
         name_input = st.selectbox(f"Select a {name_type.lower()}:", ["🔍 Select a compound..."] + sorted(names))
     else:
-        smiles_input = st_searchbox(search_smiles, key="smiles_searchbox", placeholder="Select a SMILES string...")
+        smiles_input = st_searchbox(search_smiles, key="smiles_searchbox", placeholder="Press C and select a SMILES string...")
 
 input_ready = (
     (smiles_input is not None and smiles_input != "")
@@ -91,19 +91,23 @@ if predict_button:
 
         with st.spinner("🧪 Predicting toxicity..."):
             try:
-                response = requests.post("http://localhost:8000/predict/", json={"compound": compound_id})
+                data = {
+                    "compound": compound_id,
+                }
+                response = requests.get("http://localhost:8000/predict/", params=data)
                 if response.status_code != 200:
                     st.error(f"Prediction failed with status code {response.status_code}")
                     st.stop()
 
-                results = response.json()
+                st.write(pd.DataFrame(response.json()))
 
             except Exception as e:
                 st.error(f"Cannot connect to server: {e}")
                 st.stop()
 
+        results = response.json()
         st.success("✅ Prediction completed!")
-        st.subheader("Tox21 Assay Results")
+        st.subheader("🧪 Toxicity Results")
 
         predictions = []
         probabilities = []
@@ -124,7 +128,7 @@ if predict_button:
         st.dataframe(results_df, use_container_width=True)
 
         # -------------------- RADAR CHART --------------------
-        st.subheader("Probability Overview (Radar Plot)")
+        st.subheader("📊 Overview of Probabilities")
 
         values = probabilities.copy()
         angles = np.linspace(0, 2 * np.pi, len(acronyms), endpoint=False).tolist()
@@ -146,7 +150,7 @@ if predict_button:
         st.pyplot(fig)
 
         # -------------------- LLM SUMMARY --------------------
-        st.subheader("🧠 Summary (LLM Interpretation)")
+        st.subheader("🤖 Summary (LLM Interpretation)")
 
         try:
             # toxikind_summarizer accepts a dictionary
