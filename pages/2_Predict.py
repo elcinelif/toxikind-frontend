@@ -95,7 +95,7 @@ if predict_button:
                     st.stop()
 
                 results = response.json()
-                st.write(pd.DataFrame(response.json()))
+                #st.write(pd.DataFrame(response.json()))
 
 
             except Exception as e:
